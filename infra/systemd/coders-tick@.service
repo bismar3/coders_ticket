@@ -1,0 +1,22 @@
+# Plantilla systemd: un servicio por microservicio (v1 sin contenedores).
+#   sudo cp infra/systemd/coders-tick@.service /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now coders-tick@auth coders-tick@events coders-tick@orders \
+#        coders-tick@payments coders-tick@tickets coders-tick@notifications coders-tick@checkin
+#   journalctl -u coders-tick@orders -f      # ver logs
+[Unit]
+Description=coders_tick · %i
+After=network-online.target postgresql.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=coderstick
+WorkingDirectory=/opt/coders_tick/backend/%i
+EnvironmentFile=/opt/coders_tick/backend/%i/.env
+ExecStart=/opt/coders_tick/backend/%i/.venv/bin/python -m app
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
